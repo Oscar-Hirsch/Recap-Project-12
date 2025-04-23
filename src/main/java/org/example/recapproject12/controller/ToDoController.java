@@ -28,6 +28,11 @@ public class ToDoController {
         return toDoService.getByID(id);
     }
 
+    @DeleteMapping("/{id}")
+    public ToDo deleteByID(@PathVariable String id) {
+        return toDoService.deleteById(id);
+    }
+
     @PostMapping
     public ToDo addToDo(@RequestBody ToDoDTO toDoDTO) {
         return toDoService.addToDo(toDoDTO);

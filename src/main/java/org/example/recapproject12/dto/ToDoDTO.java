@@ -5,8 +5,13 @@ import lombok.Data;
 import org.example.recapproject12.enums.Status;
 
 @Data
-@Builder
 public class ToDoDTO {
     private String description;
     private Status status;
+
+    public ToDoDTO(String description, Status status) {
+        this.description = description;
+        this.status = status;
+
+    }
 }

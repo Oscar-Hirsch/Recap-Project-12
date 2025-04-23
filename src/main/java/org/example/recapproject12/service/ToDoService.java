@@ -35,15 +35,24 @@ public class ToDoService {
 
     public ToDo updateToDo(String id, ToDoDTO toDoDTO) {
         ToDo old = toDoRepository.findById(id).orElse(null);
-        ToDo exisitingToDo = old;
         if (old != null) {
+            System.out.println(old);
             if (toDoDTO.getDescription() != null) {
-                exisitingToDo = exisitingToDo.withDescription(toDoDTO.getDescription());
+                old = old.withDescription(toDoDTO.getDescription());
             }
             if (toDoDTO.getStatus() != null) {
-                exisitingToDo = exisitingToDo.withStatus(toDoDTO.getStatus());
+                old = old.withStatus(toDoDTO.getStatus());
             }
-            return toDoRepository.save(exisitingToDo);
+            return toDoRepository.save(old);
+        }
+        return null;
+    }
+
+    public ToDo deleteById(String id) {
+        ToDo toBeDeleted = toDoRepository.findById(id).orElse(null);
+        if (toBeDeleted != null) {
+            toDoRepository.deleteById(id);
+            return toBeDeleted;
         }
         return null;
     }
