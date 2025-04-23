@@ -1,4 +1,4 @@
 package org.example.recapproject12.model;
 
-public class ToDo {
+public record ToDo(String myTodo) {
 }
