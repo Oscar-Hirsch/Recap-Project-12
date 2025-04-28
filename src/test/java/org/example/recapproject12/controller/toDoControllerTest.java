@@ -9,6 +9,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
@@ -19,6 +20,8 @@ import java.util.List;
 import java.util.Map;
 
 import static org.junit.jupiter.api.Assertions.*;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+
 @SpringBootTest
 @AutoConfigureMockMvc
 class toDoControllerTest {
@@ -44,7 +47,7 @@ class toDoControllerTest {
     @Test
     void getAll() throws Exception {
         mockMvc.perform(MockMvcRequestBuilders.get("/api/todo"))
-                .andExpect(MockMvcResultMatchers.status().isOk())
+                .andExpect(status().isOk())
                 .andExpect(MockMvcResultMatchers.content().json("""
                         [{
                         "id": "1",
@@ -65,9 +68,16 @@ class toDoControllerTest {
     }
 
     @Test
+    void getAll_returnsNoContent_WhenCalledOnEmptyDatabase() throws Exception {
+        repository.deleteAll();
+        mockMvc.perform(MockMvcRequestBuilders.get("/api/todo"))
+                .andExpect(status().isNoContent());
+    }
+
+    @Test
     void getByID() throws Exception {
         mockMvc.perform(MockMvcRequestBuilders.get("/api/todo/2"))
-                .andExpect(MockMvcResultMatchers.status().isOk())
+                .andExpect(status().isOk())
                 .andExpect(MockMvcResultMatchers.content()
                         .json("""
                         {
@@ -78,10 +88,12 @@ class toDoControllerTest {
                       """));
     }
 
+
+
     @Test
     void deleteByID() throws Exception {
         mockMvc.perform(MockMvcRequestBuilders.delete("/api/todo/2"))
-                .andExpect(MockMvcResultMatchers.status().isOk())
+                .andExpect(status().isOk())
                 .andExpect(MockMvcResultMatchers.content()
                         .json("""
                         {
@@ -102,7 +114,7 @@ class toDoControllerTest {
                             "status": "DONE"
                         }
                         """))
-                .andExpect(MockMvcResultMatchers.status().isOk())
+                .andExpect(status().isOk())
                 .andReturn()
                 .getResponse()
                 .getContentAsString();
@@ -111,7 +123,7 @@ class toDoControllerTest {
         String generatedId = JsonPath.read(result, "$.id");
 
         mockMvc.perform(MockMvcRequestBuilders.get("/api/todo/%s".formatted(generatedId)))
-                .andExpect(MockMvcResultMatchers.status().isOk())
+                .andExpect(status().isOk())
                 .andExpect(MockMvcResultMatchers.content()
                         .json("""
                         {
@@ -131,10 +143,10 @@ class toDoControllerTest {
                             "description": "Infinite Task"
                         }
                       """))
-                .andExpect(MockMvcResultMatchers.status().isOk());
+                .andExpect(status().isOk());
 
         mockMvc.perform(MockMvcRequestBuilders.get("/api/todo/2"))
-                .andExpect(MockMvcResultMatchers.status().isOk())
+                .andExpect(status().isOk())
                 .andExpect(MockMvcResultMatchers.content()
                         .json("""
                         {
