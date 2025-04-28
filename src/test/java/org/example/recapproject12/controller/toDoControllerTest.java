@@ -88,7 +88,12 @@ class toDoControllerTest {
                       """));
     }
 
-
+    @Test
+    void getByID_returnsNotFoundException_WhenCalledWithInvalidID() throws Exception {
+        repository.deleteAll();
+        mockMvc.perform(MockMvcRequestBuilders.get("/api/todo/23423"))
+                .andExpect(status().isNotFound());
+    }
 
     @Test
     void deleteByID() throws Exception {
@@ -102,6 +107,13 @@ class toDoControllerTest {
                             "status": "IN_PROGRESS"
                         }
                       """));
+    }
+
+    @Test
+    void deleteByID_throwsNoFoundException_WhenCalledWithInvalidId() throws Exception {
+        repository.deleteAll();
+        mockMvc.perform(MockMvcRequestBuilders.delete("/api/todo/2003"))
+                .andExpect(status().isNotFound());
     }
 
     @Test
@@ -119,7 +131,6 @@ class toDoControllerTest {
                 .getResponse()
                 .getContentAsString();
 
-
         String generatedId = JsonPath.read(result, "$.id");
 
         mockMvc.perform(MockMvcRequestBuilders.get("/api/todo/%s".formatted(generatedId)))
@@ -132,6 +143,18 @@ class toDoControllerTest {
                             "status": "DONE"
                         }
                       """.formatted(generatedId)));
+    }
+
+    @Test
+    void addToDo_throwsMissingDataException_whenCalledWithoutDescriptionField() throws Exception{
+        mockMvc.perform(MockMvcRequestBuilders.post("/api/todo")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content("""
+                            {
+                            "status": "DONE"
+                            }
+                         """))
+                .andExpect(status().isBadRequest());
     }
 
     @Test
@@ -155,6 +178,19 @@ class toDoControllerTest {
                             "status": "IN_PROGRESS"
                         }
                       """));
+    }
+
+    @Test
+    void updateToDo_ThrowsIdNotFoundException_WhenCalledWithInvalidID() throws Exception{
+        repository.deleteAll();
+        mockMvc.perform(MockMvcRequestBuilders.put("/api/todo/1")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("""
+                                 {
+                                 "status": "OPEN"
+                                 }
+                                 """))
+                .andExpect(status().isNotFound());
     }
 
 }
