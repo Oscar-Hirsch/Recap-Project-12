@@ -21,7 +21,7 @@ class ToDoServiceTest {
     private ToDoRepository mockRepo = mock(ToDoRepository.class);
     private IdService idServiceMock = mock(IdService.class);
     private GPTService gptServiceMock = mock(GPTService.class);
-    private ToDoService toDoService = new ToDoService(mockRepo, idServiceMock, gptServiceMock);
+    private ToDoService toDoService = new ToDoService(mockRepo);
 
     @Test
     void getAll_shouldReturnListOfTwo_WhenInitializedWithTwoEntrys() {

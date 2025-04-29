@@ -1,8 +1,10 @@
 package org.example.recapproject12.controller;
 
 
+import org.example.recapproject12.commands.Command;
 import org.example.recapproject12.dto.ToDoDTO;
 import org.example.recapproject12.model.ToDo;
+import org.example.recapproject12.repository.ToDoRepository;
 import org.example.recapproject12.service.ToDoService;
 import org.springframework.http.InvalidMediaTypeException;
 import org.springframework.http.ResponseEntity;
@@ -36,19 +38,23 @@ public class ToDoController {
     }
 
     @DeleteMapping("/{id}")
-    public ToDo deleteByID(@PathVariable String id) {
-
-        return toDoService.deleteById(id);
+    public void deleteByID(@PathVariable String id) {
+        toDoService.deleteById(id);
     }
 
     @PostMapping
-    public ToDo addToDo(@RequestBody ToDoDTO toDoDTO) {
-        return toDoService.addToDo(toDoDTO);
+    public void addToDo(@RequestBody ToDoDTO toDoDTO) {
+        toDoService.addToDo(toDoDTO);
     }
 
     @PutMapping("/{id}")
-    public ToDo updateToDo(@PathVariable String id, @RequestBody ToDoDTO toDoDTO) {
-        return toDoService.updateToDo(id, toDoDTO);
+    public void updateToDo(@PathVariable String id, @RequestBody ToDoDTO toDoDTO) {
+        toDoService.updateToDo(id, toDoDTO);
+    }
+
+    @PostMapping("/undo")
+    public void undoLastAction() {
+        toDoService.undo();
     }
 
 
