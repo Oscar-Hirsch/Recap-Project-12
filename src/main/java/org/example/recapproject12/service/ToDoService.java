@@ -2,6 +2,7 @@ package org.example.recapproject12.service;
 
 import org.example.recapproject12.dto.ToDoDTO;
 import org.example.recapproject12.enums.Status;
+import org.example.recapproject12.exceptions.ChatGPTError;
 import org.example.recapproject12.exceptions.IdNotFound;
 import org.example.recapproject12.exceptions.MissingDataToConstructToDo;
 import org.example.recapproject12.model.ToDo;
@@ -18,10 +19,12 @@ public class ToDoService {
 
     private final ToDoRepository toDoRepository;
     private final IdService idService;
+    private final GPTService gptService;
 
-    public ToDoService(ToDoRepository toDoRepository, IdService idService) {
+    public ToDoService(ToDoRepository toDoRepository, IdService idService, GPTService gptService) {
         this.toDoRepository = toDoRepository;
         this.idService = idService;
+        this.gptService = gptService;
     }
 
     public List<ToDo> getAll() {
@@ -38,9 +41,15 @@ public class ToDoService {
     }
 
     public ToDo addToDo(ToDoDTO toDoDTO) {
-        if (toDoDTO.getDescription() != null) {
-            ToDo toDo = new ToDo(idService.randomID(), toDoDTO.getDescription(), toDoDTO.getStatus());
-            return toDoRepository.save(toDo);
+        if (toDoDTO.getDescription() != null && toDoDTO.getDescription().strip() != "") {
+            try {
+                String correctedDescription = gptService.correctGrammar(toDoDTO.getDescription());
+                ToDo toDo = new ToDo(idService.randomID(), correctedDescription, toDoDTO.getStatus());
+                return toDoRepository.save(toDo);
+            } catch (Exception e) {
+                throw new ChatGPTError("AI is conscious and busy taking over the world. Please try again later.");
+            }
+
         } else {
             throw new MissingDataToConstructToDo("""
                     No To-do could be added. Please add a description:

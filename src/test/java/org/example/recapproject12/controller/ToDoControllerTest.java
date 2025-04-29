@@ -4,33 +4,46 @@ import com.jayway.jsonpath.JsonPath;
 import org.example.recapproject12.enums.Status;
 import org.example.recapproject12.model.ToDo;
 import org.example.recapproject12.repository.ToDoRepository;
+import org.example.recapproject12.service.GPTService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.mockito.Mock;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.autoconfigure.web.client.AutoConfigureMockRestServiceServer;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.http.HttpStatus;
+import org.springframework.http.HttpMethod;
 import org.springframework.http.MediaType;
+import org.springframework.test.context.TestPropertySource;
+import org.springframework.test.web.client.MockRestServiceServer;
 import org.springframework.test.web.servlet.MockMvc;
-import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
 
 import java.util.List;
-import java.util.Map;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.springframework.test.web.client.match.MockRestRequestMatchers.method;
+import static org.springframework.test.web.client.match.MockRestRequestMatchers.requestTo;
+import static org.springframework.test.web.client.response.MockRestResponseCreators.withSuccess;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @SpringBootTest
 @AutoConfigureMockMvc
-class toDoControllerTest {
+@AutoConfigureMockRestServiceServer
+@TestPropertySource(properties = {
+        "OpenAI_AuthKey=dummy-test-key"
+})
+class ToDoControllerTest {
 
     @Autowired
     private MockMvc mockMvc;
 
     @Autowired
     private ToDoRepository repository;
+
+   @Autowired
+   private MockRestServiceServer mockRestServiceServer;
+
 
     @BeforeEach
     void setup() {
@@ -118,11 +131,53 @@ class toDoControllerTest {
 
     @Test
     void addToDo() throws Exception{
+        mockRestServiceServer.expect(requestTo("https://api.openai.com/v1/chat/completions"))
+                .andExpect(method(HttpMethod.POST))
+                .andRespond(withSuccess("""
+                        {
+                          "id": "chatcmpl-B9MBs8CjcvOU2jLn4n570S5qMJKcT",
+                          "object": "chat.completion",
+                          "created": 1741569952,
+                          "model": "gpt-4.1-2025-04-14",
+                          "choices": [
+                            {
+                              "index": 0,
+                              "message": {
+                                "role": "assistant",
+                                "content": "Another last task",
+                                "refusal": null,
+                                "annotations": []
+                              },
+                              "logprobs": null,
+                              "finish_reason": "stop"
+                            }
+                          ],
+                          "usage": {
+                            "prompt_tokens": 19,
+                            "completion_tokens": 10,
+                            "total_tokens": 29,
+                            "prompt_tokens_details": {
+                              "cached_tokens": 0,
+                              "audio_tokens": 0
+                            },
+                            "completion_tokens_details": {
+                              "reasoning_tokens": 0,
+                              "audio_tokens": 0,
+                              "accepted_prediction_tokens": 0,
+                              "rejected_prediction_tokens": 0
+                            }
+                          },
+                          "service_tier": "default"
+                        }
+                        """, MediaType.APPLICATION_JSON));
+
+
+
         String result = mockMvc.perform(MockMvcRequestBuilders.post("/api/todo")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content("""
                         {
-                            "description": "Another last Task",
+                            "description": "Anothr ladst Task",
                             "status": "DONE"
                         }
                         """))
@@ -139,7 +194,7 @@ class toDoControllerTest {
                         .json("""
                         {
                             "id": "%s",
-                            "description": "Another last Task",
+                            "description": "Another last task",
                             "status": "DONE"
                         }
                       """.formatted(generatedId)));

@@ -1,6 +1,7 @@
 package org.example.recapproject12.exceptionHandler;
 
 import com.fasterxml.jackson.databind.exc.InvalidFormatException;
+import org.example.recapproject12.exceptions.ChatGPTError;
 import org.example.recapproject12.exceptions.IdNotFound;
 import org.example.recapproject12.exceptions.MissingDataToConstructToDo;
 import org.springframework.http.HttpStatus;
@@ -25,6 +26,11 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(MissingDataToConstructToDo.class)
     public ResponseEntity<String> MissingDataToConstructToDo(MissingDataToConstructToDo e) {
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
+    }
+
+    @ExceptionHandler(ChatGPTError.class)
+    public ResponseEntity<String> ChatGPTErrorHandler(ChatGPTError e) {
+        return ResponseEntity.status(HttpStatus.SERVICE_UNAVAILABLE).body(e.getMessage());
     }
 
 
